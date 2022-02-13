@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<meta charset='UTF-8'>
+<p id="title_text">Click on 'Get SSIDs' button to search for wifi networks and click to select</p>
+<!-- <input type="button" onclick="POST_req()" value="Post me"> -->
+<input type="button" onclick="GET_Jsonreq()" value="Get SSIDs" id="get_ssid_button">
+<!-- <input type="button" onclick="POST_Jsonreq()" value="Post Json me"><br> -->
+
+
+<div id="button_out"></div><br>
+
+SSID: <input type="text" id="input_ssid" >
+Password: <input type="text" id="input_pass" >
+<br><div id="output"></div><br>
+<div id="button_submit"></div><br>
+</body>
+
+<style>
+.ssid_button_class{
+	display = "block";
+	background = "blue";
+	color = "white";
+	padding = "10px 32px";
+}
+
+	.ssid_button_class:hover {
+		button.style.background: black;
+}
+
+</style>
+
+<script>
+
+document.body.onload = function(){
+		// document.getElementById("input_ssid").Text = NULL;
+		document.getElementById("input_ssid").value = "";
+		document.getElementById("input_pass").value = "";
+		create_submit_button();
+}
+
+	function POST_req(){
+		var xhttp = new XMLHttpRequest();
+		console.log(xhttp);
+
+		xhttp.onprogress = function(){
+		console.log('readyState: ',xhttp.readyState);
+		}
+
+		xhttp.onerror = function(){
+			console.log('Request error!');
+		}
+
+		xhttp.overrideMimeType("text/html");
+		xhttp.onreadystatechange = function(){
+			// writeToScreen("Inside the function call");
+			if(xhttp.readyState == 4){
+			if(xhttp.status == 200){
+				document.getElementById("output").innerHTML += " <br>" + xhttp.responseText;
+			}
+			if(xhttp.status == 404){
+				console.log("File not found");
+			}
+	}
+	};
+			//xhttp.open("POST","127.0.0.1:8080",true);
+			xhttp.open("POST","/postdata",true);
+			var data_out = 'a='+ document.getElementById("input_a").value + '&b=' + document.getElementById("input_b").value;
+	//		xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded")
+			xhttp.send(data_out);
+
+}
+
+
+function POST_Jsonreq(){
+	var xhttp = new XMLHttpRequest();
+	//console.log(xhttp);
+
+	xhttp.onerror = function(){
+		console.log('Request error!');
+	}
+
+	xhttp.onreadystatechange = function(){
+		// writeToScreen("Inside the function call");
+		if(xhttp.readyState == 4){
+		if(xhttp.status == 200){
+			var obj = JSON.parse(this.responseText);
+			console.log(obj);
+			document.getElementById("output").innerHTML += " <br>" + "a: " + obj.a + "b: " + obj.b;
+		}
+		if(xhttp.status == 404){
+			console.log("File not found");
+		}
+		//console.log(xhttp.readyState);
+}
+};
+		xhttp.open("POST","/postjson",true);
+		xhttp.setRequestHeader("Content-type","application/json")
+		var data = JSON.stringify({"a":document.getElementById("input_a").value,"b":document.getElementById("input_b").value});
+		xhttp.send(data);
+
+}
+
+
+function GET_Jsonreq(){
+
+	var c = document.getElementById("button_out");
+	var Child = c.lastElementChild;
+	while(Child){
+		c.removeChild(Child);
+		Child = c.lastElementChild;
+	}
+
+	var xhttp = new XMLHttpRequest();
+
+	xhttp.onerror = function(){
+		console.log('Request error!');
+	}
+
+	xhttp.onreadystatechange = function(){
+		// writeToScreen("Inside the function call");
+		if(xhttp.readyState == 4){
+			if(xhttp.status == 200){
+					var obj = JSON.parse(this.responseText);
+					console.log(obj);
+					console.log(obj.collection.length);
+
+					// background-color: #4CAF50; /* Green */
+					// border: none;
+					// color: white;
+					// padding: 15px 32px;
+					// text-align: center;
+					// text-decoration: none;
+					// display: inline-block;
+					// font-size: 16px;
+
+			for(var i=0;i<obj.collection.length;i++){
+					var button = document.createElement("button");
+					button.innerHTML = obj.collection[i].SSID;
+
+					button_styling(button);
+					//button.setAttribute("class","ssid_button_class");
+					button.setAttribute("id",i);
+					document.getElementById("button_out").appendChild(button);
+
+					document.getElementById(button.id).onclick = ssid_click;
+			};
+
+		}
+		if(xhttp.status == 204){
+				console.log("204 received");
+		}
+
+
+		if(xhttp.status == 404){
+			console.log("File not found");
+		}
+
+	}
+};
+		xhttp.open("GET","/getjson",true);
+		xhttp.send();
+
+}
+
+
+function button_styling(button){
+	button.style.display = "block";
+	button.style.background = "blue";
+	button.style.color = "white";
+	button.style.padding = "10px 32px";
+	button.style.width = "400px";
+	
+}
+
+function create_submit_button(){
+	var submit = document.createElement("button");
+	submit.innerHTML = "Submit";
+	document.getElementById("button_submit").appendChild(submit);
+	submit.addEventListener("click",submit_ssid);
+}
+
+
+function ssid_click(clicked){
+	document.getElementById("input_ssid").value = this.innerHTML;
+}
+
+
+function submit_ssid(){
+	var xhttp = new XMLHttpRequest();
+
+	xhttp.onerror = function(){
+		console.log('Request error!');
+	}
+
+	xhttp.onreadystatechange = function(){
+
+		if(xhttp.readyState == 4){
+		if(xhttp.status == 204){
+			document.getElementById("output").innerHTML += "sent!";
+		}
+		if(xhttp.status == 404){
+			console.log("File not found");
+		}
+}
+}
+		xhttp.open("POST","/postjson",true);
+		xhttp.setRequestHeader("Content-type","application/json")
+		var data = JSON.stringify({"SSID":document.getElementById("input_ssid").value,"password":document.getElementById("input_pass").value});
+		xhttp.send(data);
+
+}
+
+</script>
+
+</html>
