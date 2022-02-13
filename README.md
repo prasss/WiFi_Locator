@@ -5,9 +5,7 @@ A C program that runs an open source embedded server implementation named Civetw
 
 
 ## Running the code
-1. First compile the code in Vscode using already present configurations or build the code using the command:
-
-`gcc server.c wifi_search.c include/libcivetweb.a -pthread -ldl -o server`
+1. First compile the code in Vscode using already present configurations.
 
 
 2. Run the executable directly through Vscode (might require sudo access later) or in the build folder directly run:
